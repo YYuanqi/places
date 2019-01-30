@@ -7,4 +7,3 @@ class AddressComponent
     @types = params[:types]
   end
 end
-      

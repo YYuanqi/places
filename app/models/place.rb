@@ -25,20 +25,32 @@ class Place
     self.collection.insert_many( JSON.parse(file))
   end
   
-    def self.take
-    a = {_id: BSON::ObjectId('56521833e301d0284000003d'),
-        address_components:
-          [
-          {long_name:"Wilsden", short_name:"Wilsden", types:["administrative_area_level_4", "political"]},
-          {long_name:"Bradford District", short_name:"Bradford District", types:["administrative_area_level_3", "political"]}
-          ],
-        formatted_address:"Wilsden, West Yorkshire, UK",
-        geometry:
-          {
-          location:{lat:53.8256035, lng:-1.8625303},
-          geolocation:{type:"Point", coordinates:[-1.8625303, 53.8256035]}
-          }
-        }
-      return a
-    end
+  def self.find_by_short_name sn
+    self.collection.find({"address_components.short_name" => sn})
+  end
+  
+  def self.to_places hash
+    places = []
+    hash.each { |h| places.push(Place.new(h)) }
+    return places
+  end
+  
+  def self.find id
+    id = BSON::ObjectId.from_string(id)
+    result = self.collection.find(:_id => id).first
+    return result.nil? ? nil : Place.new(result)
+  end
+  
+  def self.all(offset = 0, limit = nil)
+    result = self.collection.find().skip(offset)
+    result = result.limit(limit) if limit
+    result_array = []
+    result.each { |r| result_array.push(Place.new(r)) }
+    return result_array
+  end
+  
+  def destroy
+    _id = BSON::ObjectId.from_string(@id)
+    self.class.collection.find(_id: _id).delete_one 
+  end
 end
