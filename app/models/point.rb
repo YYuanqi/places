@@ -18,4 +18,3 @@ class Point
     end
   end
 end
-          
